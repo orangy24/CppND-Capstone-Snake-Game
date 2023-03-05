@@ -3,8 +3,10 @@
 
 #include <vector>
 #include "SDL.h"
+#include "IGameObject.h"
 
-class Snake {
+//TODO: add base class game object
+class Snake : public IGameObject {
  public:
   enum class Direction { kUp, kDown, kLeft, kRight };
 

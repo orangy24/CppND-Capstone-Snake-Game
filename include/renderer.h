@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "SDL.h"
-#include "snake.h"
+#include "game_object/snake.h"
 
 class Renderer {
  public:

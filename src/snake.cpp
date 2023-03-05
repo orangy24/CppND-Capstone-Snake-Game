@@ -1,4 +1,4 @@
-#include "snake.h"
+#include "game_object/snake.h"
 #include <cmath>
 #include <iostream>
 

@@ -37,7 +37,7 @@ Renderer::~Renderer() {
   SDL_DestroyWindow(sdl_window);
   SDL_Quit();
 }
-
+//TODO(render for each object, pass render object into each game obj
 void Renderer::Render(Snake const snake, SDL_Point const &food) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
