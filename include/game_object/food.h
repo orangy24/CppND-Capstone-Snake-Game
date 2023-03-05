@@ -4,6 +4,8 @@
 #include "IGameObject.h"
 
 class Food : public IGameObject {
-    
+    void Update();
+    void PlaceFood();
+    void checkCollid();
 };
 #endif
