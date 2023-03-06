@@ -33,6 +33,14 @@ Renderer::Renderer(const std::size_t screen_width,
     std::cerr << "Renderer could not be created.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
   }
+  if (!LoadMedia()) {
+    std::cout<<"load image fail"<<std::endl;
+    std::cerr << "fail to load image. \n";
+  } else {
+    std::cout<<"load image"<<std::endl;
+    background_texure_.reset(SDL_CreateTextureFromSurface(sdl_renderer_.get(), background_img_.get()));
+  }
+
 }
 
 Renderer::~Renderer() {
@@ -40,6 +48,16 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
+bool Renderer::LoadMedia() {
+  bool success = true;
+  background_img_.reset(SDL_LoadBMP("../background.bmp"));
+  if (background_img_.get() == nullptr) {
+    std::cout<<"load media fail"<<std::endl;
+    std::cerr << "image could not be loaded. SDL_Error: " << SDL_GetError() << "\n";
+    success = false;
+  }
+  return success;
+}
 void Renderer::Render(Snake const snake, SDL_Point const &food) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
@@ -48,6 +66,9 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer_.get(), 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer_.get());
+  
+  //render background
+  SDL_RenderCopy(sdl_renderer_.get(), background_texure_.get(), NULL, NULL);
 
   // Render food
   SDL_SetRenderDrawColor(sdl_renderer_.get(), 0xFF, 0xCC, 0x00, 0xFF);
@@ -72,7 +93,7 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
     SDL_SetRenderDrawColor(sdl_renderer_.get(), 0xFF, 0x00, 0x00, 0xFF);
   }
   SDL_RenderFillRect(sdl_renderer_.get(), &block);
-
+    // SDL_RenderPresent(sdl_renderer_.get());
   // Update Screen
   SDL_RenderPresent(sdl_renderer_.get());
 }
