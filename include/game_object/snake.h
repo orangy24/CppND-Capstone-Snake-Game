@@ -15,7 +15,11 @@ class Snake : public IGameObject {
         grid_height(grid_height),
         head_x(grid_width / 2),
         head_y(grid_height / 2) {}
-
+  
+  Snake(const Snake& other) = delete;
+  Snake(const Snake&& other) = delete;
+  Snake& operator=(const Snake& other) = delete;
+  Snake& operator=(const Snake&& other) = delete;
   void Update();
 
   void GrowBody();
