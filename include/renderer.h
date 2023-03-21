@@ -23,21 +23,22 @@ class Renderer {
   void UpdateWindowTitle(int score, int fps);
 
  private:
-  bool LoadMedia();
+    void RenderBackground();
+    bool LoadMedia();
 
-  std::unique_ptr<SDL_Window, sdl_deleter> sdl_window_;
-  std::unique_ptr<SDL_Renderer, sdl_deleter> sdl_renderer_;
+    std::unique_ptr<SDL_Window, sdl_deleter> sdl_window_;
+    std::unique_ptr<SDL_Renderer, sdl_deleter> sdl_renderer_;
 
-  //The surface contained by the window
-  std::unique_ptr<SDL_Surface, sdl_deleter> sdl_surface_;
-  //The image we will load and show on the screen
-  std::unique_ptr<SDL_Surface, sdl_deleter> background_img_;
-  std::unique_ptr<SDL_Texture, sdl_deleter> background_texure_;
+    //The surface contained by the window
+    std::unique_ptr<SDL_Surface, sdl_deleter> sdl_surface_;
+    //The image we will load and show on the screen
+    std::unique_ptr<SDL_Surface, sdl_deleter> background_img_;
+    std::unique_ptr<SDL_Texture, sdl_deleter> background_texure_;
 
-  const std::size_t screen_width;
-  const std::size_t screen_height;
-  const std::size_t grid_width;
-  const std::size_t grid_height;
+    const std::size_t screen_width;
+    const std::size_t screen_height;
+    const std::size_t grid_width;
+    const std::size_t grid_height;
 };
 
 #endif

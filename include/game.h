@@ -17,6 +17,7 @@ class Game {
 
  private:
   
+  // std::vector<IGameObject> game_objects_;
   std::unique_ptr<Snake> snake_;
   SDL_Point food_;
 

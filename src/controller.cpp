@@ -5,8 +5,8 @@
 
 void Controller::ChangeDirection(Snake* snake_ptr, Snake::Direction input,
                                  Snake::Direction opposite) const {
-  if (snake_ptr->direction != opposite || snake_ptr->size == 1) snake_ptr->direction = input;
-  return;
+    if (snake_ptr->direction != opposite || snake_ptr->GetSnakeSize() == 1) snake_ptr->direction = input;
+    return;
 }
 
 void Controller::HandleInput(bool &running, Snake* snake_ptr) const {

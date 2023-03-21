@@ -5,6 +5,7 @@
 
 class Food : public IGameObject {
     void Update();
+    void Draw();
     void PlaceFood();
     void checkCollid();
 };

@@ -2,45 +2,57 @@
 #define SNAKE_H
 
 #include <vector>
-#include "SDL.h"
+
 #include "IGameObject.h"
 
 //TODO: add base class game object
 class Snake : public IGameObject {
- public:
-  enum class Direction { kUp, kDown, kLeft, kRight };
+  public:
+    enum class Direction { kUp = 0, kDown, kLeft, kRight };
 
-  Snake(int grid_width, int grid_height)
-      : grid_width(grid_width),
-        grid_height(grid_height),
-        head_x(grid_width / 2),
-        head_y(grid_height / 2) {}
+    Snake(int grid_width, int grid_height)
+        : grid_width(grid_width),
+          grid_height(grid_height),
+          head_pos_({grid_width / 2.0f, grid_height / 2.0f}) 
+          {}
   
-  Snake(const Snake& other) = delete;
-  Snake(const Snake&& other) = delete;
-  Snake& operator=(const Snake& other) = delete;
-  Snake& operator=(const Snake&& other) = delete;
-  void Update();
+    Snake(const Snake& other) = delete;
+    Snake(const Snake&& other) = delete;
+    Snake& operator=(const Snake& other) = delete;
+    Snake& operator=(const Snake&& other) = delete;
 
-  void GrowBody();
-  bool SnakeCell(int x, int y);
+    void Update();
+    void Draw(SDL_Renderer* sdl_renderer, SDL_Rect& block);
 
-  Direction direction = Direction::kUp;
+    void GrowBody();
+    void UpdateSpeed(float speed);
+    bool SnakeCell(int x, int y);
+    
+    bool isAlive() const {
+        return alive_;
+    }
+    SDL_FPoint GetSnakeHead() const {
+        return head_pos_;
+    }
+    int GetSnakeSize() const {
+        return size_;
+    }
+    Direction direction = Direction::kUp;
+    std::vector<SDL_Point> body;
 
-  float speed{0.1f};
-  int size{1};
-  bool alive{true};
-  float head_x;
-  float head_y;
-  std::vector<SDL_Point> body;
+  private:
+    void UpdateHead();
+    void UpdateBody(SDL_Point &current_cell, SDL_Point &prev_cell);
 
- private:
-  void UpdateHead();
-  void UpdateBody(SDL_Point &current_cell, SDL_Point &prev_cell);
+    float speed_{0.1f};
+    int size_{1};
+    bool alive_{true};
 
-  bool growing{false};
-  int grid_width;
-  int grid_height;
+    SDL_FPoint head_pos_;
+
+    bool growing{false};
+    int grid_width;
+    int grid_height;
 };
 
 #endif
