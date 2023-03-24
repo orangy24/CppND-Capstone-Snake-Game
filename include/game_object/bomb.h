@@ -1,91 +1,86 @@
-// #ifndef BOMB_H
-// #define BOMB_H
+#ifndef BOMB_H
+#define BOMB_H
 
-// #include "IGameObject.h"
+#include "IGameObject.h"
 
-// class Bomb : public IGameObject {
-//     void Update();
-//     void PlaceFood();
-// };
-// #endif
 
-// #include <thread>
-// #include <future>
+#include <thread>
+#include <future>
 
-// // Define the Bomb class
-// class Bomb {
-// public:
-//     int x, y, size, countdown;
-//     bool exploded;
+// Define the Bomb class
+class Bomb : public IGameObject {
+  public:
+    int x, y;
+    int size, countdown;
+    bool exploded;
 
-//     Bomb(int _x, int _y) {
-//         x = _x;
-//         y = _y;
-//         size = 10;
-//         countdown = 3000; // 3 seconds
-//         exploded = false;
-//     }
+    Bomb(int _x, int _y) explicit {
+        x = _x;
+        y = _y;
+        size = 10;
+        countdown = 3000; // 3 seconds
+        exploded = false;
+    }
 
-//     void draw(SDL_Renderer* renderer) {
-//         SDL_Rect rect = { x - size/2, y - size/2, size, size };
-//         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-//         SDL_RenderFillRect(renderer, &rect);
-//     }
+    void Draw(SDL_Renderer* renderer) {
+        SDL_Rect rect = { x - size/2, y - size/2, size, size };
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &rect);
+    
+    void update(int dt) {
+        countdown -= dt;
+        if (countdown <= 0) {
+            exploded = true;
+        }
+    }
 
-//     void update(int dt) {
-//         countdown -= dt;
-//         if (countdown <= 0) {
-//             exploded = true;
-//         }
-//     }
+    bool collidesWithSnake(Snake& snake) {
+        int dx = x - snake.x;
+        int dy = y - snake.y;
+        int distance = std::sqrt(dx*dx + dy*dy);
+        if (distance <= size/2 + snake.size/2) {
+            return true;
+        }
+        return false;
+    }
 
-//     bool collidesWithSnake(Snake& snake) {
-//         int dx = x - snake.x;
-//         int dy = y - snake.y;
-//         int distance = std::sqrt(dx*dx + dy*dy);
-//         if (distance <= size/2 + snake.size/2) {
-//             return true;
-//         }
-//         return false;
-//     }
+    bool collidesWithExplosion(int explosionX, int explosionY, int explosionSize) {
+        int dx = x - explosionX;
+        int dy = y - explosionY;
+        int distance = std::sqrt(dx*dx + dy*dy);
+        if (distance <= size/2 + explosionSize/2) {
+            return true;
+        }
+        return false;
+    }
 
-//     bool collidesWithExplosion(int explosionX, int explosionY, int explosionSize) {
-//         int dx = x - explosionX;
-//         int dy = y - explosionY;
-//         int distance = std::sqrt(dx*dx + dy*dy);
-//         if (distance <= size/2 + explosionSize/2) {
-//             return true;
-//         }
-//         return false;
-//     }
+    void startTimer() {
+        // Create a promise object to signal when the bomb explodes
+        std::promise<void> promiseObj;
 
-//     void startTimer() {
-//         // Create a promise object to signal when the bomb explodes
-//         std::promise<void> promiseObj;
+        // Get the future object from the promise
+        std::future<void> futureObj = promiseObj.get_future();
 
-//         // Get the future object from the promise
-//         std::future<void> futureObj = promiseObj.get_future();
+        // Create a new thread to run the bomb timer
+        std::thread timerThread(&Bomb::timer, this, std::move(promiseObj));
 
-//         // Create a new thread to run the bomb timer
-//         std::thread timerThread(&Bomb::timer, this, std::move(promiseObj));
+        // Detach the thread to run in the background
+        timerThread.detach();
 
-//         // Detach the thread to run in the background
-//         timerThread.detach();
+        // Wait for the timer thread to complete
+        futureObj.get();
+    }
 
-//         // Wait for the timer thread to complete
-//         futureObj.get();
-//     }
+    void timer(std::promise<void> promiseObj) {
+        while (countdown > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            update(10);
+        }
 
-//     void timer(std::promise<void> promiseObj) {
-//         while (countdown > 0) {
-//             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-//             update(10);
-//         }
-
-//         // Signal that the bomb has exploded
-//         promiseObj.set_value();
-//     }
-// };
+        // Signal that the bomb has exploded
+        promiseObj.set_value();
+    }
+};
 
 // // In the main game loop:
 // std::vector<Bomb> bombs;
@@ -124,3 +119,6 @@
 
 // // When the snake eats a bomb
 // if (snake.collides
+
+
+#endif

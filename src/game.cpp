@@ -4,13 +4,14 @@
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake_(std::make_unique<Snake>(grid_width, grid_height)),
+      food_(std::make_unique<Food>(grid_width, grid_height)),
       engine(dev()),
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
     //TODO: create game objects into vector
     //1. spwan snake
     //2. place food
-    PlaceFood();
+    food_->PlaceFood(snake_.get());
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -28,7 +29,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       // Input, Update, Render - the main game loop.
       controller.HandleInput(running, snake_.get());
       Update();
-      renderer.Render(snake_.get(), food_);
+      renderer.Render(snake_.get(), food_.get());
 
       frame_end = SDL_GetTicks();
 
@@ -53,21 +54,6 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   }
 }
 
-void Game::PlaceFood() {
-    int x, y;
-    while (true) {
-        x = random_w(engine);
-        y = random_h(engine);
-        // Check that the location is not occupied by a snake item before placing
-        // food.
-        if (!snake_->SnakeCell(x, y)) {
-          food_.x = x;
-          food_.y = y;
-          return;
-        }
-    }
-}
-
 void Game::Update() {
     if (!snake_->isAlive()) return;
 
@@ -78,9 +64,13 @@ void Game::Update() {
 
     // Check if there's food over here
     // snake check collide with food
-    if (food_.x == new_x && food_.y == new_y) {
+    auto food_pos = food_->GetFoodPosition();
+    // std::cout<<"food pos: "<<food_pos.x<<" "<<food_pos.y<<std::endl;
+    // std::cout<<"snake pos: "<<new_x<<" "<<new_x<<std::endl;
+    if (food_pos.x == new_x && food_pos.y == new_y) {
+      // std::cout<<"hitt"<<std::endl;
       score++;
-      PlaceFood();
+      food_->PlaceFood(snake_.get());
       // Grow snake and increase speed.
       snake_->GrowBody();
       snake_->UpdateSpeed(0.02);

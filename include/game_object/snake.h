@@ -2,7 +2,6 @@
 #define SNAKE_H
 
 #include <vector>
-
 #include "IGameObject.h"
 
 //TODO: add base class game object
@@ -11,8 +10,8 @@ class Snake : public IGameObject {
     enum class Direction { kUp = 0, kDown, kLeft, kRight };
 
     Snake(int grid_width, int grid_height)
-        : grid_width(grid_width),
-          grid_height(grid_height),
+        : grid_width_(grid_width),
+          grid_height_(grid_height),
           head_pos_({grid_width / 2.0f, grid_height / 2.0f}) 
           {}
   
@@ -27,7 +26,7 @@ class Snake : public IGameObject {
     void GrowBody();
     void UpdateSpeed(float speed);
     bool SnakeCell(int x, int y);
-    
+
     bool isAlive() const {
         return alive_;
     }
@@ -44,15 +43,15 @@ class Snake : public IGameObject {
     void UpdateHead();
     void UpdateBody(SDL_Point &current_cell, SDL_Point &prev_cell);
 
+    //snake attr
     float speed_{0.1f};
     int size_{1};
     bool alive_{true};
-
     SDL_FPoint head_pos_;
 
-    bool growing{false};
-    int grid_width;
-    int grid_height;
+    bool growing_{false};
+    int grid_width_;
+    int grid_height_;
 };
 
 #endif

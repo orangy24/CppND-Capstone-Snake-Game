@@ -1,6 +1,5 @@
 #include "game_object/snake.h"
 #include <cmath>
-#include <iostream>
 
 void Snake::Draw(SDL_Renderer* sdl_renderer, SDL_Rect& block) {
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -58,19 +57,19 @@ void Snake::UpdateHead() {
     }
 
     // Wrap the Snake around to the beginning if going off of the screen.
-    head_pos_.x = fmod(head_pos_.x + grid_width, grid_width);
-    head_pos_.y = fmod(head_pos_.y + grid_height, grid_height);
+    head_pos_.x = fmod(head_pos_.x + grid_width_, grid_width_);
+    head_pos_.y = fmod(head_pos_.y + grid_height_, grid_height_);
 }
 
 void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) {
     // Add previous head location to vector
     body.push_back(prev_head_cell);
 
-    if (!growing) {
+    if (!growing_) {
         // Remove the tail from the vector.
         body.erase(body.begin());
     } else {
-        growing = false;
+        growing_ = false;
         size_++;
     }
 
@@ -84,7 +83,7 @@ void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) 
 void Snake::UpdateSpeed(float s) {
     speed_ += s;
 }
-void Snake::GrowBody() { growing = true; }
+void Snake::GrowBody() { growing_ = true; }
 
 // Inefficient method to check if cell is occupied by snake.
 bool Snake::SnakeCell(int x, int y) {
