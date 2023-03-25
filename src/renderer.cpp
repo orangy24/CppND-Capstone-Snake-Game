@@ -58,7 +58,7 @@ bool Renderer::LoadMedia() {
     }
     return success;
 }
-void Renderer::Render(Snake* snake_ptr, Food* food_ptr) {
+void Renderer::Render(Snake* snake_ptr, Food* food_ptr, std::vector<std::shared_ptr<Bomb>> bombs) {
     SDL_Rect block;
     block.w = screen_width / grid_width;
     block.h = screen_height / grid_height;
@@ -74,6 +74,10 @@ void Renderer::Render(Snake* snake_ptr, Food* food_ptr) {
     // Render snake
     snake_ptr->Draw(sdl_renderer_.get(), block);
 
+    //Render Bomb
+    for (const auto& bomb : bombs) {
+        bomb->Draw(sdl_renderer_.get(), block);
+    }
     // Update Screen
     SDL_RenderPresent(sdl_renderer_.get());
 }

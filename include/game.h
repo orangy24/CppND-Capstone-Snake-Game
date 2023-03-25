@@ -7,6 +7,7 @@
 #include "renderer.h"
 #include "game_object/snake.h"
 #include "game_object/food.h"
+#include "game_object/bomb.h"
 
 class Game {
  public:
@@ -21,6 +22,7 @@ class Game {
   // std::vector<IGameObject> game_objects_;
   std::unique_ptr<Snake> snake_;
   std::unique_ptr<Food> food_;
+  std::vector<std::shared_ptr<Bomb>> bombs_;
 
   std::random_device dev;
   std::mt19937 engine;

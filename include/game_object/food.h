@@ -4,6 +4,7 @@
 #include "IGameObject.h"
 #include "snake.h"
 #include <random>
+#include <iostream>
 
 class Food : public IGameObject {
   public:

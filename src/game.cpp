@@ -12,6 +12,10 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
     //1. spwan snake
     //2. place food
     food_->PlaceFood(snake_.get());
+    //create one bomb as beginning
+    auto new_bomb = std::make_shared<Bomb>(grid_width, grid_height);
+    new_bomb->Spawn(snake_.get());
+    bombs_.emplace_back(std::move(new_bomb));
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -29,7 +33,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       // Input, Update, Render - the main game loop.
       controller.HandleInput(running, snake_.get());
       Update();
-      renderer.Render(snake_.get(), food_.get());
+      renderer.Render(snake_.get(), food_.get(), bombs_);
 
       frame_end = SDL_GetTicks();
 

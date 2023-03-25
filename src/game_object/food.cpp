@@ -19,5 +19,6 @@ void Food::Draw(SDL_Renderer* sdl_renderer, SDL_Rect& block) {
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
     block.x = this->food_pos_.x * block.w;
     block.y = this->food_pos_.y * block.h;
+    // std::cout<<"draw food at"<<block.x<<" "<<block.y<<std::endl;
     SDL_RenderFillRect(sdl_renderer, &block);
 }
