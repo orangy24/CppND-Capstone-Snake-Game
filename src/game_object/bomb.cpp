@@ -1,5 +1,6 @@
 #include "game_object/bomb.h"
 
+
 void Bomb::Spawn(Snake* snake) {
     int x, y;
     while (true) {
@@ -11,6 +12,7 @@ void Bomb::Spawn(Snake* snake) {
           this->x_ = x;
           this->y_ = y;
           std::cout<<"create a bomb at"<<x<<" "<<y<<std::endl;
+          startTimer(3);
           return;
         }
     }
@@ -20,44 +22,70 @@ void Bomb::Draw(SDL_Renderer* renderer, SDL_Rect& block) {
     block.x = x_ * block.w;
     block.y = y_ * block.h;
     // std::cout<<"draw bomb at"<<block.x<<" "<<block.y<<std::endl;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &block);
+}
+bool Bomb::CoolDown() {
+    uint32_t currentTick = SDL_GetTicks();
+    uint32_t duration = currentTick - explode_time_;
+    if (duration > exlode_duration_) {
+        return true;
+    }
+    return false;
+}
+void Bomb::DrawExplode(SDL_Renderer* renderer, SDL_Rect& block) {
+    // block = { x_ , y_ , size_, size_ };
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+    // explode at x, y
+    // x - 2, y
+    SDL_Rect rectX = {
+        x_ * block.w -  block.w * 2,
+        y_ * block.h ,
+        block.w * 5,
+        block.h
+    };
+    SDL_RenderDrawRect(renderer, &rectX);
+    SDL_Rect rectY = {
+        x_ * block.w ,
+        y_ * block.h - 2 * block.h ,
+        block.w ,
+        block.h * 5
+    };
+    SDL_RenderDrawRect(renderer, &rectY);
+        // SDL_RenderFillRect(renderer, &rect);
 }
 
 void Bomb::count_down(int dt) {
     countdown_ -= dt;
     if (countdown_ <= 0) {
-        exploded_ = true;
+        std::cout<<"exploded"<<std::endl;
+        exploding_ = true;
+        explode_time_ = SDL_GetTicks();
     }
 }
 
-bool Bomb::collidesWithSnake() {
-    // auto snake
-    // int dx = x_ - snake_->x;
-    // int dy = y_ - snake_->y;
-    // int distance = std::sqrt(dx * dx + dy * dy);
-    // if (distance <= size/2 + snake_.size/2) {
-    //     return true;
-    // }
+bool Bomb::collidesWithExplosion(Snake* snake) {
+    for (int i = -2; i <= 2; i++) {
+        if(snake->SnakeCell(x_ + i, y_) || snake->SnakeCell(x_, y_ + i)) return true;
+    }
     return false;
 }
 
-bool Bomb::collidesWithExplosion(int explosionX, int explosionY, int explosionSize) {
-    int dx = x_ - explosionX;
-    int dy = y_ - explosionY;
-    int distance = std::sqrt(dx*dx + dy*dy);
-    if (distance <= size_/2 + explosionSize/2) {
+bool Bomb::collidesWithoutExplosion(Snake* snake) {
+    if(snake->SnakeCell(x_, y_)) {
         return true;
     }
     return false;
 }
 
-void Bomb::startTimer() {
+void Bomb::startTimer(int sec) {
     // Create a promise object to signal when the bomb explodes
     std::promise<void> promiseObj;
-
+    countdown_ = sec * 1000;
+    exploding_ = false;
     // Get the future object from the promise
-    std::future<void> futureObj = promiseObj.get_future();
+    futureObj_ = promiseObj.get_future();
 
     // Create a new thread to run the bomb timer
     std::thread timerThread(&Bomb::timer, this, std::move(promiseObj));
@@ -65,8 +93,6 @@ void Bomb::startTimer() {
     // Detach the thread to run in the background
     timerThread.detach();
 
-    // Wait for the timer thread to complete
-    futureObj.get();
 }
 
 void Bomb::timer(std::promise<void> promiseObj) {

@@ -76,7 +76,14 @@ void Renderer::Render(Snake* snake_ptr, Food* food_ptr, std::vector<std::shared_
 
     //Render Bomb
     for (const auto& bomb : bombs) {
-        bomb->Draw(sdl_renderer_.get(), block);
+        if (bomb->isExploding()) {
+            // std::cout<<"draw bomb explode"<<std::endl;
+            bomb->DrawExplode(sdl_renderer_.get(), block);
+            // bomb->Draw(sdl_renderer_.get(), block);
+            // bomb->Spawn(snake_ptr);
+        } else {
+            bomb->Draw(sdl_renderer_.get(), block);
+        }
     }
     // Update Screen
     SDL_RenderPresent(sdl_renderer_.get());

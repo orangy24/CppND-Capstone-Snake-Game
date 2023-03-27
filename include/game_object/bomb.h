@@ -18,31 +18,40 @@ class Bomb {
           random_w(0, static_cast<int>(grid_width - 1)),
           random_h(0, static_cast<int>(grid_height - 1)) {
             size_ = 20;
-            countdown_ = 2000; // 2 seconds
-            exploded_ = false;
+            countdown_ = 3500; // 3.5 seconds
+            exploding_ = false;
     }
     ~Bomb() {}
     void Spawn(Snake* snake);
 
     void Draw(SDL_Renderer* renderer, SDL_Rect& block);
 
-    bool collidesWithSnake();
+    void DrawExplode(SDL_Renderer* renderer, SDL_Rect& block);
 
-    bool collidesWithExplosion(int explosionX, int explosionY, int explosionSize);
-
-    void startTimer();
+    bool collidesWithExplosion(Snake* );
+    bool collidesWithoutExplosion(Snake* );
+    void startTimer(int );
 
     void timer(std::promise<void> promiseObj);
+
+    bool CoolDown();
+    bool isExploding() const {
+        return exploding_;
+    }
+
+    std::future<void> futureObj_;
+
  private:
     void count_down(int dt);
-    SDL_Point food_pos_;
+    uint32_t explode_time_;
     std::random_device dev;
     std::mt19937 engine;
     std::uniform_int_distribution<int> random_w;
     std::uniform_int_distribution<int> random_h;
     int x_, y_;
     int size_, countdown_;
-    bool exploded_;
+    uint32_t exlode_duration_{1500}; // 1s
+    bool exploding_;
     int grid_width_;
     int grid_height_;
 };

@@ -4,18 +4,17 @@
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake_(std::make_unique<Snake>(grid_width, grid_height)),
-      food_(std::make_unique<Food>(grid_width, grid_height)),
-      engine(dev()),
-      random_w(0, static_cast<int>(grid_width - 1)),
-      random_h(0, static_cast<int>(grid_height - 1)) {
+      food_(std::make_unique<Food>(grid_width, grid_height)) {
     //TODO: create game objects into vector
     //1. spwan snake
     //2. place food
     food_->PlaceFood(snake_.get());
     //create one bomb as beginning
-    auto new_bomb = std::make_shared<Bomb>(grid_width, grid_height);
-    new_bomb->Spawn(snake_.get());
-    bombs_.emplace_back(std::move(new_bomb));
+    for (int i = 0; i < 3; i++) {
+        auto new_bomb = std::make_shared<Bomb>(grid_width, grid_height);
+        new_bomb->Spawn(snake_.get());
+        bombs_.emplace_back(std::move(new_bomb));
+    }
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -65,14 +64,26 @@ void Game::Update() {
     auto snake_head = snake_->GetSnakeHead();
     int new_x = static_cast<int>(snake_head.x);
     int new_y = static_cast<int>(snake_head.y);
-
+    for (const auto& bomb : bombs_) {
+        if (bomb->isExploding()) {
+            if(bomb->collidesWithExplosion(snake_.get())) {
+                snake_->Kill();
+            }
+            if (bomb->CoolDown()) {
+                bomb->Spawn(snake_.get());
+            }
+        } else {
+            if(bomb->collidesWithoutExplosion(snake_.get())){
+                snake_->Kill();
+            }
+        }
+    }
     // Check if there's food over here
     // snake check collide with food
     auto food_pos = food_->GetFoodPosition();
     // std::cout<<"food pos: "<<food_pos.x<<" "<<food_pos.y<<std::endl;
     // std::cout<<"snake pos: "<<new_x<<" "<<new_x<<std::endl;
     if (food_pos.x == new_x && food_pos.y == new_y) {
-      // std::cout<<"hitt"<<std::endl;
       score++;
       food_->PlaceFood(snake_.get());
       // Grow snake and increase speed.

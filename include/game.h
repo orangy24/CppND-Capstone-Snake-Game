@@ -24,11 +24,6 @@ class Game {
   std::unique_ptr<Food> food_;
   std::vector<std::shared_ptr<Bomb>> bombs_;
 
-  std::random_device dev;
-  std::mt19937 engine;
-  std::uniform_int_distribution<int> random_w;
-  std::uniform_int_distribution<int> random_h;
-
   int score{0};
 
   void PlaceFood();

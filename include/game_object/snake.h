@@ -36,6 +36,10 @@ class Snake : public IGameObject {
     int GetSnakeSize() const {
         return size_;
     }
+
+    void Kill() {
+        alive_ = false;
+    }
     Direction direction = Direction::kUp;
     std::vector<SDL_Point> body;
 
