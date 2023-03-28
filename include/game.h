@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <random>
+#include <list>
 #include "SDL.h"
 #include "controller.h"
 #include "renderer.h"
@@ -9,6 +10,7 @@
 #include "game_object/food.h"
 #include "game_object/bomb.h"
 
+static constexpr int BOMB_SPAWN_RATE = 150;
 class Game {
  public:
   Game(std::size_t grid_width, std::size_t grid_height);
@@ -19,15 +21,18 @@ class Game {
 
  private:
   
-  // std::vector<IGameObject> game_objects_;
+  std::size_t grid_width_;
+  std::size_t grid_height_;
   std::unique_ptr<Snake> snake_;
   std::unique_ptr<Food> food_;
-  std::vector<std::shared_ptr<Bomb>> bombs_;
+  std::list<std::shared_ptr<Bomb>> bombs_;
+  std::condition_variable cv_;
+  std::mutex mtx_;
+  bool paused_ = false;
 
   int score{0};
-
-  void PlaceFood();
   void Update();
+  void SpawnBomb();
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include <vector>
+#include <list>
 #include "SDL.h"
 #include "game_object/snake.h"
 #include "game_object/food.h"
@@ -21,7 +22,7 @@ class Renderer {
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
-  void Render(Snake* snake_ptr, Food* food_ptr, std::vector<std::shared_ptr<Bomb>> bombs);
+  void Render(Snake* snake_ptr, Food* food_ptr, std::list<std::shared_ptr<Bomb>> bombs);
   void UpdateWindowTitle(int score, int fps);
 
  private:

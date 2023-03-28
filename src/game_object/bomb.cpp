@@ -28,7 +28,7 @@ void Bomb::Draw(SDL_Renderer* renderer, SDL_Rect& block) {
 bool Bomb::CoolDown() {
     uint32_t currentTick = SDL_GetTicks();
     uint32_t duration = currentTick - explode_time_;
-    if (duration > exlode_duration_) {
+    if (duration > exlode_duration_ && exploding_) {
         return true;
     }
     return false;
@@ -40,17 +40,17 @@ void Bomb::DrawExplode(SDL_Renderer* renderer, SDL_Rect& block) {
     // explode at x, y
     // x - 2, y
     SDL_Rect rectX = {
-        x_ * block.w -  block.w * 2,
+        x_ * block.w -  block.w * EXPLODERAD,
         y_ * block.h ,
-        block.w * 5,
+        block.w * (2 * EXPLODERAD + 1) ,
         block.h
     };
     SDL_RenderDrawRect(renderer, &rectX);
     SDL_Rect rectY = {
         x_ * block.w ,
-        y_ * block.h - 2 * block.h ,
+        y_ * block.h - EXPLODERAD * block.h ,
         block.w ,
-        block.h * 5
+        block.h * (2 * EXPLODERAD + 1)
     };
     SDL_RenderDrawRect(renderer, &rectY);
         // SDL_RenderFillRect(renderer, &rect);
@@ -66,7 +66,7 @@ void Bomb::count_down(int dt) {
 }
 
 bool Bomb::collidesWithExplosion(Snake* snake) {
-    for (int i = -2; i <= 2; i++) {
+    for (int i = -EXPLODERAD; i <= EXPLODERAD; i++) {
         if(snake->SnakeCell(x_ + i, y_) || snake->SnakeCell(x_, y_ + i)) return true;
     }
     return false;

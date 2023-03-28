@@ -9,6 +9,7 @@
 #include <future>
 #include <iostream>
 // Define the Bomb class
+static constexpr int EXPLODERAD = 2;
 class Bomb {
   public:
     Bomb(std::size_t grid_width, std::size_t grid_height)
@@ -21,7 +22,11 @@ class Bomb {
             countdown_ = 3500; // 3.5 seconds
             exploding_ = false;
     }
-    ~Bomb() {}
+    Bomb(const Bomb& other) = delete;
+    Bomb(const Bomb&& other) = delete;
+    Bomb& operator=(const Bomb& other) = delete;
+    Bomb& operator=(const Bomb&& other) = delete;
+    ~Bomb() { std::cout<<"bomb destory"<<std::endl; }
     void Spawn(Snake* snake);
 
     void Draw(SDL_Renderer* renderer, SDL_Rect& block);
@@ -35,6 +40,7 @@ class Bomb {
     void timer(std::promise<void> promiseObj);
 
     bool CoolDown();
+
     bool isExploding() const {
         return exploding_;
     }
@@ -55,44 +61,6 @@ class Bomb {
     int grid_width_;
     int grid_height_;
 };
-
-// // In the main game loop:
-// std::vector<Bomb> bombs;
-
-// // Spawn a bomb
-// Bomb bomb(rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
-// bombs.push_back(bomb);
-
-// // Draw the bombs
-// for (int i = 0; i < bombs.size(); i++) {
-//     bombs[i].draw(renderer);
-// }
-
-// // Check for collision with the snake
-// for (int i = 0; i < bombs.size(); i++) {
-//     if (bombs[i].collidesWithSnake(snake)) {
-//         bombs[i].startTimer();
-//         // The game will continue while the bomb timer runs in a separate thread
-//     }
-// }
-
-// // When the bomb explodes
-// if (bombs[i].exploded) {
-//     // Create an explosion effect
-//     // ...
-
-//     // Check for collision with the snake
-//     if (bombs[i].collidesWithSnake(snake)) {
-//         // The snake dies
-//         // ...
-//     }
-
-//     // Remove the bomb from the list
-//     bombs.erase(bombs.begin() + i);
-// }
-
-// // When the snake eats a bomb
-// if (snake.collides
 
 
 #endif

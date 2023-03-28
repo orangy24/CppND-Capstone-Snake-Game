@@ -3,18 +3,15 @@
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : snake_(std::make_unique<Snake>(grid_width, grid_height)),
+    : grid_width_(grid_width),
+      grid_height_(grid_height),
+      snake_(std::make_unique<Snake>(grid_width, grid_height)),
       food_(std::make_unique<Food>(grid_width, grid_height)) {
     //TODO: create game objects into vector
     //1. spwan snake
     //2. place food
     food_->PlaceFood(snake_.get());
-    //create one bomb as beginning
-    for (int i = 0; i < 3; i++) {
-        auto new_bomb = std::make_shared<Bomb>(grid_width, grid_height);
-        new_bomb->Spawn(snake_.get());
-        bombs_.emplace_back(std::move(new_bomb));
-    }
+
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -27,10 +24,15 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     bool running = true;
 
     while (running) {
+      if (!snake_->isAlive()) break;
+      std::unique_lock<std::mutex> lock(mtx_);
+      cv_.wait(lock, [&]{ return !paused_; });
       frame_start = SDL_GetTicks();
-
+      if (rand() % BOMB_SPAWN_RATE == 0) {
+          SpawnBomb();
+      }
       // Input, Update, Render - the main game loop.
-      controller.HandleInput(running, snake_.get());
+      controller.HandleInput(running, paused_, cv_, snake_.get());
       Update();
       renderer.Render(snake_.get(), food_.get(), bombs_);
 
@@ -56,28 +58,27 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       }
   }
 }
-
+void Game::SpawnBomb() {
+    auto new_bomb = std::make_shared<Bomb>(grid_width_, grid_height_);
+    new_bomb->Spawn(snake_.get());
+    bombs_.emplace_back(std::move(new_bomb));
+}
 void Game::Update() {
     if (!snake_->isAlive()) return;
-
     snake_->Update();
     auto snake_head = snake_->GetSnakeHead();
     int new_x = static_cast<int>(snake_head.x);
     int new_y = static_cast<int>(snake_head.y);
     for (const auto& bomb : bombs_) {
-        if (bomb->isExploding()) {
-            if(bomb->collidesWithExplosion(snake_.get())) {
-                snake_->Kill();
-            }
-            if (bomb->CoolDown()) {
-                bomb->Spawn(snake_.get());
-            }
-        } else {
-            if(bomb->collidesWithoutExplosion(snake_.get())){
-                snake_->Kill();
-            }
-        }
+        if ((bomb->isExploding() && bomb->collidesWithExplosion(snake_.get())) ||
+            bomb->collidesWithoutExplosion(snake_.get())) {
+            snake_->Kill();
+        } 
     }
+    auto removeBomb = [&](std::shared_ptr<Bomb> bomb) -> bool {
+        return bomb->CoolDown();
+    };
+    bombs_.remove_if(removeBomb);
     // Check if there's food over here
     // snake check collide with food
     auto food_pos = food_->GetFoodPosition();
