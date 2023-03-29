@@ -8,74 +8,93 @@ Renderer::Renderer(const std::size_t screen_width,
     : screen_width(screen_width),
       screen_height(screen_height),
       grid_width(grid_width),
-      grid_height(grid_height) {
-  // Initialize SDL
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    std::cerr << "SDL could not initialize.\n";
-    std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
-  }
+      grid_height(grid_height),
+      sdl_window_(nullptr, sdl_deleter()),
+      sdl_renderer_(nullptr, sdl_deleter()) {
 
-  // Create Window
-  sdl_window = SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
-                                SDL_WINDOWPOS_CENTERED, screen_width,
-                                screen_height, SDL_WINDOW_SHOWN);
+    // Initialize SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        std::cerr << "SDL could not initialize.\n";
+        std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    }
 
-  if (nullptr == sdl_window) {
-    std::cerr << "Window could not be created.\n";
-    std::cerr << " SDL_Error: " << SDL_GetError() << "\n";
-  }
+    // Create Window
+    sdl_window_.reset(SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
+                                  SDL_WINDOWPOS_CENTERED, screen_width,
+                                  screen_height, SDL_WINDOW_SHOWN));
 
-  // Create renderer
-  sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
-  if (nullptr == sdl_renderer) {
-    std::cerr << "Renderer could not be created.\n";
-    std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
-  }
+    if (nullptr == sdl_window_.get()) {
+        std::cerr << "Window could not be created.\n";
+        std::cerr << " SDL_Error: " << SDL_GetError() << "\n";
+    }
+
+    // Create renderer
+    sdl_renderer_.reset(SDL_CreateRenderer(sdl_window_.get(), -1, SDL_RENDERER_ACCELERATED));
+    if (nullptr == sdl_renderer_.get()) {
+        std::cerr << "Renderer could not be created.\n";
+        std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    }
+    if (!LoadMedia()) {
+        std::cout<<"load image fail"<<std::endl;
+        std::cerr << "fail to load image. \n";
+    } else {
+        std::cout<<"load image"<<std::endl;
+        background_texure_.reset(SDL_CreateTextureFromSurface(sdl_renderer_.get(), background_img_.get()));
+    }
+
 }
 
 Renderer::~Renderer() {
-  SDL_DestroyWindow(sdl_window);
-  SDL_Quit();
+    SDL_Quit();
 }
 
-void Renderer::Render(Snake const snake, SDL_Point const &food) {
-  SDL_Rect block;
-  block.w = screen_width / grid_width;
-  block.h = screen_height / grid_height;
+bool Renderer::LoadMedia() {
+    bool success = true;
+    background_img_.reset(SDL_LoadBMP("../background.bmp"));
+    if (background_img_.get() == nullptr) {
+        std::cout<<"load media fail"<<std::endl;
+        std::cerr << "image could not be loaded. SDL_Error: " << SDL_GetError() << "\n";
+        success = false;
+    }
+    return success;
+}
+void Renderer::Render(Snake* snake_ptr, Food* food_ptr, std::list<std::shared_ptr<Bomb>> bombs) {
+    SDL_Rect block;
+    block.w = screen_width / grid_width;
+    block.h = screen_height / grid_height;
 
-  // Clear screen
-  SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
-  SDL_RenderClear(sdl_renderer);
+    // Clear screen
+    SDL_SetRenderDrawColor(sdl_renderer_.get(), 0x1E, 0x1E, 0x1E, 0xFF);
+    SDL_RenderClear(sdl_renderer_.get());
+    RenderBackground();
 
-  // Render food
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
-  block.x = food.x * block.w;
-  block.y = food.y * block.h;
-  SDL_RenderFillRect(sdl_renderer, &block);
+    // Render food
+    food_ptr->Draw(sdl_renderer_.get(), block);
 
-  // Render snake's body
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  for (SDL_Point const &point : snake.body) {
-    block.x = point.x * block.w;
-    block.y = point.y * block.h;
-    SDL_RenderFillRect(sdl_renderer, &block);
-  }
+    // Render snake
+    snake_ptr->Draw(sdl_renderer_.get(), block);
 
-  // Render snake's head
-  block.x = static_cast<int>(snake.head_x) * block.w;
-  block.y = static_cast<int>(snake.head_y) * block.h;
-  if (snake.alive) {
-    SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
-  } else {
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
-  }
-  SDL_RenderFillRect(sdl_renderer, &block);
+    //Render Bomb
+    for (const auto& bomb : bombs) {
+        if (bomb->isExploding()) {
+            // std::cout<<"draw bomb explode"<<std::endl;
+            bomb->DrawExplode(sdl_renderer_.get(), block);
+            // bomb->Draw(sdl_renderer_.get(), block);
+            // bomb->Spawn(snake_ptr);
+        } else {
+            bomb->Draw(sdl_renderer_.get(), block);
+        }
+    }
+    // Update Screen
+    SDL_RenderPresent(sdl_renderer_.get());
+}
 
-  // Update Screen
-  SDL_RenderPresent(sdl_renderer);
+void Renderer::RenderBackground() {
+    //render background
+    SDL_RenderCopy(sdl_renderer_.get(), background_texure_.get(), NULL, NULL);
 }
 
 void Renderer::UpdateWindowTitle(int score, int fps) {
   std::string title{"Snake Score: " + std::to_string(score) + " FPS: " + std::to_string(fps)};
-  SDL_SetWindowTitle(sdl_window, title.c_str());
+  SDL_SetWindowTitle(sdl_window_.get(), title.c_str());
 }
