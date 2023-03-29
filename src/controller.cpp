@@ -9,7 +9,7 @@ void Controller::ChangeDirection(Snake* snake_ptr, Snake::Direction input,
     return;
 }
 
-void Controller::HandleInput(bool &running, bool &paused, Snake* snake_ptr) const {
+void Controller::HandleInput(bool &running, Snake* snake_ptr) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {

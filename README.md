@@ -4,9 +4,39 @@ This is a starter repo for the Capstone project in the [Udacity C++ Nanodegree P
 
 <img src="snake_game.gif"/>
 
-The Capstone Project gives you a chance to integrate what you've learned throughout this program. This project will become an important part of your portfolio to share with current and future colleagues and employers.
+This is a classic Snake game implementation using C++ and SDL (Simple DirectMedia Layer) library. In this version, a Bomb feature is added to the game. The game window is rendered using SDL.
 
-In this project, you can build your own C++ application or extend this Snake game, following the principles you have learned throughout this Nanodegree Program. This project will demonstrate that you can independently create applications using a wide range of C++ features.
+## Folder structure
+```bash
+├── CMakeLists.txt
+├── CODEOWNERS
+├── LICENSE.md
+├── README.md
+├── background.bmp
+├── cmake
+│   └── FindSDL2_image.cmake
+├── include
+│   ├── controller.h
+│   ├── game.h
+│   ├── game_object
+│   │   ├── IGameObject.h
+│   │   ├── bomb.h
+│   │   ├── food.h
+│   │   └── snake.h
+│   └── renderer.h
+├── snake_game.gif
+└── src
+    ├── controller.cpp
+    ├── game.cpp
+    ├── game_object
+    │   ├── bomb.cpp
+    │   ├── food.cpp
+    │   └── snake.cpp
+    ├── main.cpp
+    └── renderer.cpp
+
+5 directories, 21 files
+```
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
@@ -28,8 +58,31 @@ In this project, you can build your own C++ application or extend this Snake gam
 1. Clone this repo.
 2. Make a build directory in the top level directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./SnakeGame`.
+4. Run it: `./SnakeGame`.Game Controls
+Use the arrow keys to move the snake.
+Press 'p' to pause the game.
+Press 'q' to quit the game.
+Bomb Feature
+In this version of the game, Bombs will be spawned randomly and they will explode after a certain time, killing the snake if it's caught in the explosion range.
 
+Game Rules
+The objective of the game is to control the snake to eat as many apples as possible.
+Each apple eaten will increase the snake's length.
+The game ends when the snake hits the wall or its own body, or is killed by the explosion of a bomb.
+The longer the snake becomes, the more difficult it is to avoid colliding with itself.
+
+## Game Controls
+Use the arrow keys to move the snake.
+Press 'p' to pause the game.
+Press 'q' to quit the game.
+### Bomb Feature
+In this version of the game, Bombs will be spawned randomly and they will explode after a certain time, killing the snake if it's caught in the explosion range.
+
+## Game Rules
+The objective of the game is to control the snake to eat as many apples as possible.
+Each apple eaten will increase the snake's length.
+The game ends when the snake hits the wall or its own body, or is killed by the explosion of a bomb.
+The longer the snake becomes, the more difficult it is to avoid colliding with itself.
 
 ## CC Attribution-ShareAlike 4.0 International
 
