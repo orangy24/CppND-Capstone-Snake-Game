@@ -7,7 +7,7 @@ This is a starter repo for the Capstone project in the [Udacity C++ Nanodegree P
 This is a classic Snake game implementation using C++ and SDL (Simple DirectMedia Layer) library. In this version, a Bomb feature is added to the game. The game window is rendered using SDL.
 
 ## Folder structure
-.
+```bash
 ├── CMakeLists.txt
 ├── CODEOWNERS
 ├── LICENSE.md
@@ -36,6 +36,7 @@ This is a classic Snake game implementation using C++ and SDL (Simple DirectMedi
     └── renderer.cpp
 
 5 directories, 21 files
+```
 
 ## Dependencies for Running Locally
 * cmake >= 3.7
@@ -57,7 +58,18 @@ This is a classic Snake game implementation using C++ and SDL (Simple DirectMedi
 1. Clone this repo.
 2. Make a build directory in the top level directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
-4. Run it: `./SnakeGame`.
+4. Run it: `./SnakeGame`.Game Controls
+Use the arrow keys to move the snake.
+Press 'p' to pause the game.
+Press 'q' to quit the game.
+Bomb Feature
+In this version of the game, Bombs will be spawned randomly and they will explode after a certain time, killing the snake if it's caught in the explosion range.
+
+Game Rules
+The objective of the game is to control the snake to eat as many apples as possible.
+Each apple eaten will increase the snake's length.
+The game ends when the snake hits the wall or its own body, or is killed by the explosion of a bomb.
+The longer the snake becomes, the more difficult it is to avoid colliding with itself.
 
 ## Game Controls
 Use the arrow keys to move the snake.
