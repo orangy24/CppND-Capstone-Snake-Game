@@ -6,7 +6,7 @@
 
 class Controller {
  public:
-  void HandleInput(bool &running, bool& pause, std::condition_variable& cv, Snake* snake_ptr) const;
+  void HandleInput(bool &running, bool& pause, Snake* snake_ptr) const;
 
  private:
   void ChangeDirection(Snake* snake_ptr, Snake::Direction input,

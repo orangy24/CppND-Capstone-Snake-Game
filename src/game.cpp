@@ -24,15 +24,13 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     bool running = true;
 
     while (running) {
-      if (!snake_->isAlive()) break;
-      std::unique_lock<std::mutex> lock(mtx_);
-      cv_.wait(lock, [&]{ return !paused_; });
+      // if (!snake_->isAlive()) break;
       frame_start = SDL_GetTicks();
-      if (rand() % BOMB_SPAWN_RATE == 0) {
+      if (snake_->isAlive() && rand() % BOMB_SPAWN_RATE == 0) {
           SpawnBomb();
       }
       // Input, Update, Render - the main game loop.
-      controller.HandleInput(running, paused_, cv_, snake_.get());
+      controller.HandleInput(running, paused_, snake_.get());
       Update();
       renderer.Render(snake_.get(), food_.get(), bombs_);
 
