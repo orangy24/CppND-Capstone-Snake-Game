@@ -13,26 +13,31 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
     food_->PlaceFood(snake_.get());
 
 }
+void Game::SetGameHandler(Controller* controller, Renderer* renderer,
+           std::size_t target_frame_duration) {
+    controller_handler = controller;
+    renderer_handler = renderer;
+    target_frame_duration_ = target_frame_duration;
+}
 
-void Game::Run(Controller const &controller, Renderer &renderer,
-               std::size_t target_frame_duration) {
+void Game::Run() {
     Uint32 title_timestamp = SDL_GetTicks();
     Uint32 frame_start;
     Uint32 frame_end;
     Uint32 frame_duration;
     int frame_count = 0;
-    bool running = true;
+    running_ = true;
 
-    while (running) {
+    while (running_) {
       // if (!snake_->isAlive()) break;
       frame_start = SDL_GetTicks();
       if (snake_->isAlive() && rand() % BOMB_SPAWN_RATE == 0) {
           SpawnBomb();
       }
       // Input, Update, Render - the main game loop.
-      controller.HandleInput(running, paused_, snake_.get());
+      controller_handler->HandleInput(running_, snake_.get());
       Update();
-      renderer.Render(snake_.get(), food_.get(), bombs_);
+      renderer_handler->Render(snake_.get(), food_.get(), bombs_);
 
       frame_end = SDL_GetTicks();
 
@@ -43,7 +48,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
       // After every second, update the window title.
       if (frame_end - title_timestamp >= 1000) {
-          renderer.UpdateWindowTitle(score, frame_count);
+          renderer_handler->UpdateWindowTitle(score, frame_count);
           frame_count = 0;
           title_timestamp = frame_end;
       }
@@ -51,15 +56,20 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       // If the time for this frame is too small (i.e. frame_duration is
       // smaller than the target ms_per_frame), delay the loop to
       // achieve the correct frame rate.
-      if (frame_duration < target_frame_duration) {
-          SDL_Delay(target_frame_duration - frame_duration);
+      if (frame_duration < target_frame_duration_) {
+          SDL_Delay(target_frame_duration_ - frame_duration);
       }
   }
 }
 void Game::SpawnBomb() {
-    auto new_bomb = std::make_shared<Bomb>(grid_width_, grid_height_);
-    new_bomb->Spawn(snake_.get());
-    bombs_.emplace_back(std::move(new_bomb));
+    std::lock_guard<std::mutex> lock(mtx_);
+    int number_of_bomb = rand() % BOMB_SPAWN_NUMBER;  
+    for (int i = 0; i < number_of_bomb; i++) {
+        auto new_bomb = std::make_shared<Bomb>(grid_width_, grid_height_);
+        new_bomb->Spawn(snake_.get());
+        bombs_.emplace_back(std::move(new_bomb));
+    }
+
 }
 void Game::Update() {
     if (!snake_->isAlive()) return;
@@ -73,10 +83,14 @@ void Game::Update() {
             snake_->Kill();
         } 
     }
-    auto removeBomb = [&](std::shared_ptr<Bomb> bomb) -> bool {
-        return bomb->CoolDown();
-    };
-    bombs_.remove_if(removeBomb);
+    {
+      std::lock_guard<std::mutex> lock(mtx_);
+      auto removeBomb = [&](std::shared_ptr<Bomb> bomb) -> bool {
+          return bomb->CoolDown();
+      };
+      bombs_.remove_if(removeBomb);
+    }
+    
     // Check if there's food over here
     // snake check collide with food
     auto food_pos = food_->GetFoodPosition();
